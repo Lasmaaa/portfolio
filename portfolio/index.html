@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#171411">
+    <meta name="description" content="Explore the digital museum of Lāsma, a web developer from Latvia.">
+    <title>Lāsma — The Digital Museum</title>
+
+    <link rel="stylesheet" href="../css/index.css">
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+        }
+    }
+    </script>
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        #museum-canvas {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+
+        #museum-canvas canvas {
+            display: block;
+            cursor: grab;
+        }
+
+        #museum-canvas canvas.dragging {
+            cursor: grabbing;
+        }
+
+        #museum-canvas .exhibit-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+        }
+
+        .museum-overlay {
+            pointer-events: none;
+        }
+
+        .museum-overlay .explore-button {
+            pointer-events: auto;
+        }
+
+        .museum-skill-list span {
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .museum-skill-list span:hover,
+        .museum-skill-list span.active-skill {
+            transform: translateY(-2px);
+            border-color: #d5a96c;
+            color: #d5a96c;
+        }
+
+        .skill-code-box {
+            display: none;
+            margin: 1.5rem auto;
+            max-width: 560px;
+            background: #211c18;
+            border: 1px solid #3d342c;
+            border-radius: 6px;
+            padding: 1rem 1.25rem;
+            text-align: left;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #ffd9a6;
+            overflow-x: auto;
+        }
+
+        .skill-code-box.visible {
+            display: block;
+        }
+
+        .skill-code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #a89b8c;
+        }
+
+        .exhibit-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .github-btn {
+            background: transparent;
+            border: 1px solid #b18a55;
+            color: #f5efe6;
+        }
+
+        .github-btn:hover {
+            background: rgba(177, 138, 85, 0.15);
+        }
+
+        .my-story-block {
+            margin-top: 1.75rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(177, 138, 85, 0.25);
+        }
+
+        .my-story-block h3 {
+            font-size: 1.15rem;
+            color: #d5a96c;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.03em;
+        }
+
+        .my-story-block p + p {
+            margin-top: 0.85rem;
+        }
+    </style>
+</head>
+
+<body class="museum-page">
+
+    <header class="museum-header">
+        <a class="brand" href="index.html">lāsma<span>.</span></a>
+
+        <p class="museum-label">THE DIGITAL MUSEUM · EST. 2026</p>
+
+        <nav class="museum-nav">
+            <a href="#gallery">Exhibitions</a>
+            <a href="#about">About</a>
+            <a href="#skills">Skills</a>
+            <a href="#contact" href="mailto:ipa24.l.surgunte@vtdt.edu.lv">Contact</a>
+
+            <button class="theme-toggle" id="mode-toggle"
+                type="button" aria-label="Switch theme">
+                <img src="../images/moon.png" alt="">
+            </button>
+        </nav>
+    </header>
+
+    <main>
+        <section class="museum-intro">
+            <p class="eyebrow">WELCOME TO MY DIGITAL WORLD</p>
+
+            <h1>Where code becomes <span>art.</span></h1>
+
+            <p>
+                A collection of ideas, experiments and digital creations.
+                Step inside and explore my work.
+            </p>
+
+            <a href="#gallery" class="museum-enter">
+                ENTER THE GALLERY <span>↓</span>
+            </a>
+        </section>
+
+        <section class="museum-section" id="gallery">
+
+            <div class="gallery-heading">
+                <div>
+                    <p class="eyebrow">INTERACTIVE EXPERIENCE</p>
+                    <h2>The exhibition room</h2>
+                </div>
+
+                <span class="gallery-number">ROOM 001 — MAIN GALLERY</span>
+            </div>
+
+            <div class="museum-container">
+
+                <div id="museum-canvas">
+                    <div class="exhibit-modal" id="exhibit-modal" aria-hidden="true">
+                        <div class="exhibit-content">
+                            <button class="modal-close" id="modal-close"
+                                aria-label="Close project details">×</button>
+
+                            <p class="eyebrow" id="exhibit-category">
+                                EXHIBIT 001
+                            </p>
+
+                            <h2 id="exhibit-title">Project title</h2>
+
+                            <p id="exhibit-description"></p>
+
+                            <div id="exhibit-tags" class="exhibit-tags"></div>
+
+                            <div class="exhibit-actions">
+                                <a href="#" id="exhibit-link" class="museum-enter">
+                                    EXPLORE PROJECT →
+                                </a>
+                                <a href="https://github.com" id="exhibit-github" target="_blank" rel="noopener noreferrer" class="museum-enter github-btn">
+                                    GITHUB ↗
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="museum-overlay">
+                    <span class="museum-status">
+                        <span class="status-dot"></span>
+                        MUSEUM OPEN
+                    </span>
+
+                    <div class="museum-controls">
+                        <span>W A S D — MOVE</span>
+                        <span>LEFT CLICK + DRAG — LOOK AROUND</span>
+                        <span>CLICK — VIEW EXHIBIT</span>
+                        <span>ESC — EXIT FULLSCREEN</span>
+                    </div>
+
+                    <button id="start-exploring" class="explore-button">
+                        START EXPLORING ↗
+                    </button>
+                </div>
+
+            </div>
+
+            <p class="gallery-caption">
+                A virtual space dedicated to creativity, technology and design.
+            </p>
+
+        </section>
+
+        <section class="museum-about" id="about">
+            <div>
+                <p class="eyebrow">THE ARTIST BEHIND THE WORK</p>
+                <h2>Every line of code tells a story.</h2>
+            </div>
+
+            <div>
+                <p>
+                    I'm Lāsma, a web developer from Latvia.
+                    I enjoy transforming ideas into beautiful,
+                    functional and meaningful digital experiences.
+                </p>
+
+                <div class="my-story-block">
+                    <h3>My story</h3>
+                    <p>
+                        I’m a 19-year-old web developer based in Latvia. I love learning new technologies, solving problems, and bringing creative ideas to life through the web.
+                    </p>
+                    <p>
+                        My journey began with a simple curiosity and a passion for technology. I’m focused on improving my skills and building websites that are both functional and thoughtfully designed. I enjoy the challenge of starting with an idea and seeing it become something real.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="museum-skills" id="skills">
+            <p class="eyebrow">ROOM 002 — THE TOOL COLLECTION</p>
+            <h2>The tools behind the art.</h2>
+
+            <div class="museum-skill-list" id="skill-list">
+                <span data-skill="HTML">HTML</span>
+                <span data-skill="CSS">CSS</span>
+                <span data-skill="JavaScript">JavaScript</span>
+                <span data-skill="Laravel">Laravel</span>
+                <span data-skill="MySQL">MySQL</span>
+            </div>
+
+            <div class="skill-code-box" id="skill-code-box">
+                <div class="skill-code-header">
+                    <span id="skill-code-title">CODE SNIPPET</span>
+                    <span>CLICK SKILL TO CLOSE</span>
+                </div>
+                <pre><code id="skill-code-content"></code></pre>
+            </div>
+        </section>
+
+        <section class="museum-contact" id="contact">
+            <p class="eyebrow">THE NEXT EXHIBITION COULD BE YOURS</p>
+            <h2>Have an idea?</h2>
+            <a href="mailto:ipa24.l.surgunte@vtdt.edu.lv" class="museum-enter">
+                LET'S CREATE SOMETHING →
+            </a>
+        </section>
+
+    </main>
+
+    <footer class="museum-footer">
+        <span data-year></span> LĀSMA</span>
+        <span>DESIGNED WITH CURIOSITY.</span>
+    </footer>
+
+    <script src="../js/index.js"></script>
+    <script type="module" src="../js/museum.js"></script>
+
+</body>
+</html>
